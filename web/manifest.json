@@ -1,0 +1,23 @@
+{
+    "name": "Siame",
+    "short_name": "Siame",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0061f6",
+    "theme_color": "#0061f6",
+    "description": "Tous les vendeurs, toutes les envies - Une seule plateforme pour tout trouver !.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

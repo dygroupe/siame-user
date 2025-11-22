@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>926015535595-j75110jro3du9im0ikkukd5hbgjsio66.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.926015535595-j75110jro3du9im0ikkukd5hbgjsio66</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>926015535595-elq2rav7l31n5ogaulll863h2k8pdbb4.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDYGMduuLmDFzCSKY0j9QhWrc8evi5hvGQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>926015535595</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.siameshop.user2</string>
+	<key>PROJECT_ID</key>
+	<string>siame-adfe1</string>
+	<key>STORAGE_BUCKET</key>
+	<string>siame-adfe1.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:926015535595:ios:6dfd459391c73ae03441ae</string>
+</dict>
+</plist>
