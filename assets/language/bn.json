@@ -1645,5 +1645,7 @@
   "logout_successful": "সফলভাবে লগ আউট হয়েছে",
   "earn_more_by_referring_friends": "বন্ধুদের রেফার করে আরও উপার্জন করুন",
   "ratio_1_1": "(অনুপাত ১:১)",
-  "click_to_add": "যোগ করতে ক্লিক করুন"
+  "click_to_add": "যোগ করতে ক্লিক করুন",
+  "no_images_available": "কোন ছবি নেই",
+  "no_image_available": "কোন ছবি নেই"
 }

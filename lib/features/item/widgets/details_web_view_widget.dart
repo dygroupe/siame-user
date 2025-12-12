@@ -19,6 +19,7 @@ import 'package:sixam_mart/common/widgets/footer_view.dart';
 import 'package:sixam_mart/features/checkout/screens/checkout_screen.dart';
 import 'package:sixam_mart/features/item/screens/item_details_screen.dart';
 import 'package:sixam_mart/features/item/widgets/item_title_view_widget.dart';
+import 'package:sixam_mart/helper/image_helper.dart';
 
 class DetailsWebViewWidget extends StatelessWidget {
   final CartModel? cartModel;
@@ -27,14 +28,68 @@ class DetailsWebViewWidget extends StatelessWidget {
   final OnlineCart? cart;
   const DetailsWebViewWidget({super.key, required this.cartModel, required this.stock, required this.priceWithAddOns, this.cart});
 
+  /// Obtient la liste des images valides
+  List<String> _getValidImageList(ItemController itemController) {
+    if (itemController.item == null) return [];
+    
+    final List<String> validImages = [];
+    
+    // Ajouter l'image principale si valide
+    if (itemController.item!.imageFullUrl != null && 
+        ImageHelper.isValidImageUrl(itemController.item!.imageFullUrl)) {
+      validImages.add(itemController.item!.imageFullUrl!);
+    }
+    
+    // Ajouter les images supplémentaires valides
+    if (itemController.item!.imagesFullUrl != null && 
+        itemController.item!.imagesFullUrl!.isNotEmpty) {
+      for (final url in itemController.item!.imagesFullUrl!) {
+        if (ImageHelper.isValidImageUrl(url)) {
+          validImages.add(url!);
+        }
+      }
+    }
+    
+    return validImages;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ItemController>(builder: (itemController) {
-      List<String?> imageList = [];
-      imageList.add(itemController.item!.imageFullUrl);
-      if(itemController.item!.imagesFullUrl != null) {
-        imageList.addAll(itemController.item!.imagesFullUrl!);
+      // Vérification de sécurité
+      if (itemController.item == null) {
+        return const Center(child: CircularProgressIndicator());
       }
+      
+      // Obtenir la liste des images valides
+      final List<String> imageList = _getValidImageList(itemController);
+      
+      // Si aucune image n'est disponible, utiliser un placeholder
+      if (imageList.isEmpty) {
+        return SingleChildScrollView(
+          child: FooterView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height - 560),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/image/placeholder.jpg', width: 200, height: 200),
+                    const SizedBox(height: 20),
+                    Text('no_images_available'.tr, style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+      
+      // S'assurer que productSelect est dans les limites
+      final safeProductSelect = itemController.productSelect >= 0 && 
+                                itemController.productSelect < imageList.length
+                                ? itemController.productSelect
+                                : 0;
 
       return SingleChildScrollView(child: FooterView(
         child: ConstrainedBox(
@@ -57,8 +112,11 @@ class DetailsWebViewWidget extends StatelessWidget {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(Dimensions.radiusMedium),
                                 child: CustomImage(
-                                  fit: BoxFit.cover, height: Get.size.height * 0.5, width: double.infinity,
-                                  image: '${imageList[itemController.productSelect]}',
+                                  fit: BoxFit.cover, 
+                                  height: Get.size.height * 0.5, 
+                                  width: double.infinity,
+                                  image: imageList[safeProductSelect],
+                                  useHighQuality: true, // Haute qualité pour les images de détail
                                 ),
                               ),
                             ),
@@ -66,7 +124,16 @@ class DetailsWebViewWidget extends StatelessWidget {
                             imageList.length > 1 ? Positioned(
                               left: 10, top: Get.size.height * 0.5 / 2 - 30,
                               child: InkWell(
-                                onTap: () => itemController.setSelect(itemController.productSelect == 0 ? imageList.length - 1 : itemController.productSelect - 1, true),
+                                onTap: () {
+                                  try {
+                                    final newIndex = safeProductSelect == 0 ? imageList.length - 1 : safeProductSelect - 1;
+                                    if (newIndex >= 0 && newIndex < imageList.length) {
+                                      itemController.setSelect(newIndex, true);
+                                    }
+                                  } catch (e) {
+                                    print('Erreur lors de la navigation précédente: $e');
+                                  }
+                                },
                                 child: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 16),
                               ),
                             ) : const SizedBox(),
@@ -74,7 +141,16 @@ class DetailsWebViewWidget extends StatelessWidget {
                             imageList.length > 1 ? Positioned(
                               right: 5, top: Get.size.height * 0.5 / 2 - 30,
                               child: InkWell(
-                                onTap: () => itemController.setSelect(itemController.productSelect == imageList.length - 1 ? 0 : itemController.productSelect + 1, true),
+                                onTap: () {
+                                  try {
+                                    final newIndex = safeProductSelect == imageList.length - 1 ? 0 : safeProductSelect + 1;
+                                    if (newIndex >= 0 && newIndex < imageList.length) {
+                                      itemController.setSelect(newIndex, true);
+                                    }
+                                  } catch (e) {
+                                    print('Erreur lors de la navigation suivante: $e');
+                                  }
+                                },
                                 child: const Icon(Icons.arrow_forward_ios, color: Colors.black, size: 16),
                               ),
                             ) : const SizedBox(),
@@ -83,27 +159,49 @@ class DetailsWebViewWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 15),
 
-                        SizedBox(height: 70, child: itemController.item!.imageFullUrl != null ? ListView.builder(
+                        SizedBox(height: 70, child: imageList.isNotEmpty ? ListView.builder(
                           itemCount: imageList.length,
                           scrollDirection: Axis.horizontal,
-                          itemBuilder: (context,index){
+                          itemBuilder: (context, index) {
+                            // Vérification de sécurité de l'index
+                            if (index < 0 || index >= imageList.length) {
+                              return const SizedBox();
+                            }
+                            
+                            final imageUrl = imageList[index];
+                            if (!ImageHelper.isValidImageUrl(imageUrl)) {
+                              return const SizedBox();
+                            }
+                            
                             return Padding(
                               padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
                               child: InkWell(
-                                onTap: () => itemController.setSelect(index, true),
+                                onTap: () {
+                                  try {
+                                    if (index >= 0 && index < imageList.length) {
+                                      itemController.setSelect(index, true);
+                                    }
+                                  } catch (e) {
+                                    print('Erreur lors de la sélection d\'image: $e');
+                                  }
+                                },
                                 child: Container(
                                   width: 70,
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).cardColor,
                                     borderRadius: BorderRadius.circular(Dimensions.radiusMedium),
-                                    border: Border.all(color: index == itemController.productSelect ? Theme.of(context).primaryColor : Colors.transparent),
+                                    border: Border.all(
+                                      color: index == safeProductSelect 
+                                          ? Theme.of(context).primaryColor 
+                                          : Colors.transparent
+                                    ),
                                   ),
                                   padding: const EdgeInsets.all(2),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(Dimensions.radiusMedium),
                                     child: CustomImage(
                                       fit: BoxFit.cover,
-                                      image: '${imageList[index]}',
+                                      image: imageUrl,
                                     ),
                                   ),
                                 ),

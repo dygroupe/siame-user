@@ -1646,5 +1646,7 @@
   "logout_successful": "Cierre de Sesión Exitoso",
   "earn_more_by_referring_friends": "Gana más recomendando amigos",
   "ratio_1_1": "(Relación 1:1)",
-  "click_to_add": "Haz clic para Añadir"
+  "click_to_add": "Haz clic para Añadir",
+  "no_images_available": "No hay imágenes disponibles",
+  "no_image_available": "No hay imagen disponible"
 }

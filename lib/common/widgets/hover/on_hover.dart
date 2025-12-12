@@ -26,8 +26,9 @@ class _OnHoverState extends State<OnHover> {
         widget.fromMenu ? const BoxShadow(color: Colors.transparent) :
         BoxShadow(
           color: Get.find<ThemeController>().darkTheme ? const Color(0xFFBDBDBD).withValues(alpha: 0.1) : Theme.of(context).primaryColor.withValues(alpha: 0.05),
-          blurRadius: 10,
-          offset: const Offset(0, 10),
+          // Réduit le blurRadius de 10 à 5 pour économiser la mémoire GPU
+          blurRadius: 5,
+          offset: const Offset(0, 5),
         ),
       ],
     );

@@ -1646,5 +1646,7 @@
   "logout_successful": "تم تسجيل الخروج بنجاح",
   "earn_more_by_referring_friends": "اكسب المزيد عن طريق إحالة الأصدقاء",
   "ratio_1_1": "(النسبة 1:1)",
-  "click_to_add": "انقر للإضافة"
+  "click_to_add": "انقر للإضافة",
+  "no_images_available": "لا توجد صور متاحة",
+  "no_image_available": "لا توجد صورة متاحة"
 }

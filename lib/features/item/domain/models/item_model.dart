@@ -140,14 +140,51 @@ class Item {
     id = json['id'];
     name = json['name'];
     description = json['description'];
-    imageFullUrl = json['image_full_url'];
+    
+    // Gestion sécurisée de l'image principale
+    try {
+      final dynamic imageData = json['image_full_url'];
+      if (imageData != null && imageData.toString().trim().isNotEmpty && 
+          imageData.toString().toLowerCase() != 'null' && 
+          imageData.toString().toLowerCase() != 'undefined') {
+        final cleanedUrl = imageData.toString().trim();
+        // Validation basique de l'URL
+        if (cleanedUrl.isNotEmpty && 
+            !cleanedUrl.toLowerCase().startsWith('null') &&
+            !cleanedUrl.toLowerCase().startsWith('undefined')) {
+          imageFullUrl = cleanedUrl;
+        } else {
+          imageFullUrl = null;
+        }
+      } else {
+        imageFullUrl = null;
+      }
+    } catch (e) {
+      print('Erreur lors du parsing de image_full_url: $e');
+      imageFullUrl = null;
+    }
+    
+    // Gestion sécurisée de la liste d'images
     if(json['images_full_url'] != null){
       imagesFullUrl = [];
-      json['images_full_url'].forEach((v) {
-        if(v != null) {
-          imagesFullUrl!.add(v.toString());
-        }
-      });
+      try {
+        json['images_full_url'].forEach((v) {
+          if(v != null) {
+            final urlString = v.toString().trim();
+            // Filtrer les URLs invalides (null, undefined, espaces)
+            if (urlString.isNotEmpty && 
+                urlString.toLowerCase() != 'null' && 
+                urlString.toLowerCase() != 'undefined') {
+              imagesFullUrl!.add(urlString);
+            }
+          }
+        });
+      } catch (e) {
+        print('Erreur lors du parsing de images_full_url: $e');
+        imagesFullUrl = [];
+      }
+    } else {
+      imagesFullUrl = [];
     }
     categoryId = json['category_id'];
     if (json['category_ids'] != null) {

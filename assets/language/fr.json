@@ -1653,5 +1653,7 @@
   "logout_successful": "Déconnexion réussie",
   "earn_more_by_referring_friends": "Gagnez plus en parrainant vos amis",
   "ratio_1_1": "(Ratio 1:1)",
-  "click_to_add": "Cliquez pour ajouter"
+  "click_to_add": "Cliquez pour ajouter",
+  "no_images_available": "Aucune image disponible",
+  "no_image_available": "Aucune image disponible"
 }

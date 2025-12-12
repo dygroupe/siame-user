@@ -1653,5 +1653,7 @@
   "logout_successful": "Logout Successful",
   "earn_more_by_referring_friends": "Earn more by referring friends",
   "ratio_1_1": "(Ratio 1:1)",
-  "click_to_add": "Click to Add"
+  "click_to_add": "Click to Add",
+  "no_images_available": "No images available",
+  "no_image_available": "No image available"
 }
