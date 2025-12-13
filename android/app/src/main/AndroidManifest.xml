@@ -28,6 +28,12 @@
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="*/*" />
         </intent>
+        <!-- Déclaration du schéma Wave pour permettre l'interaction avec l'application Wave -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="wave" />
+        </intent>
+        <package android:name="com.wave.personal" />
     </queries>
 
     <application

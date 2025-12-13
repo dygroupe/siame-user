@@ -40,6 +40,36 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   InAppWebViewController? webViewController;
   final GlobalKey webViewKey = GlobalKey();
 
+  /// Gère les URLs Wave et les redirige vers l'application Wave ou le Play Store
+  Future<bool> _handleWaveUrl(String url, InAppWebViewController controller) async {
+    try {
+      if (url.startsWith('wave://capture/')) {
+        final String afterCapture = url.substring('wave://capture/'.length);
+        final Uri waveUri = Uri.parse(url);
+        if (await canLaunchUrl(waveUri)) {
+          await launchUrl(waveUri, mode: LaunchMode.externalApplication);
+          return true;
+        }
+        // Fallback: ouvrir l'URL https sous-jacente
+        final Uri httpsUri = Uri.parse(afterCapture);
+        await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
+        return true;
+      } else {
+        final Uri waveUri = Uri.parse(url);
+        if (await canLaunchUrl(waveUri)) {
+          await launchUrl(waveUri, mode: LaunchMode.externalApplication);
+          return true;
+        }
+      }
+    } catch (_) {}
+    // Si rien n'a été lancé, ouvrir le Play Store
+    await launchUrl(
+      Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
+      mode: LaunchMode.externalApplication,
+    );
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -107,6 +137,11 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 webViewController = controller;
               },
               onLoadStart: (controller, url) async {
+                final current = url?.toString() ?? '';
+                if (current.startsWith('wave://')) {
+                  await _handleWaveUrl(current, controller);
+                  return;
+                }
                 Get.find<OrderController>().paymentRedirect(
                   url: url.toString(), canRedirect: _canRedirect, onClose: (){} ,
                   addFundUrl: widget.addFundUrl, orderID: widget.orderModel.id.toString(), contactNumber: widget.contactNumber,
@@ -119,6 +154,11 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 Uri uri = navigationAction.request.url!;
+                // Intercepte explicitement wave:// et ouvre l'app
+                if (uri.scheme == "wave") {
+                  await _handleWaveUrl(uri.toString(), controller);
+                  return NavigationActionPolicy.CANCEL;
+                }
                 if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
                   if (await canLaunchUrl(uri)) {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -150,6 +190,23 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               onConsoleMessage: (controller, consoleMessage) {
                 debugPrint(consoleMessage.message);
+              },
+              onReceivedError: (controller, request, error) async {
+                final failing = request.url.toString();
+                if (failing.startsWith('wave://')) {
+                  await _handleWaveUrl(failing, controller);
+                  return;
+                }
+              },
+              onCreateWindow: (controller, action) async {
+                final uri = action.request.url;
+                if (uri == null) return false;
+                final url = uri.toString();
+                if (url.startsWith('wave://')) {
+                  await _handleWaveUrl(url, controller);
+                  return true; // géré
+                }
+                return false;
               },
             ),
             _isLoading ? Center(

@@ -13,6 +13,7 @@ import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:sixam_mart/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:sixam_mart/features/wallet/widgets/fund_payment_dialog_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;
@@ -172,6 +173,32 @@ class MyInAppBrowser extends InAppBrowser {
 
   final bool _canRedirect = true;
 
+  /// Ouvre une URL externe (Wave ou autre) et gère les fallbacks
+  Future<void> _openExternalUrl(String raw) async {
+    try {
+      if (raw.startsWith('wave://capture/')) {
+        final String afterCapture = raw.substring('wave://capture/'.length);
+        final Uri waveUri = Uri.parse(raw);
+        if (await canLaunchUrl(waveUri)) {
+          await launchUrl(waveUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        final Uri httpsUri = Uri.parse(afterCapture);
+        await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+      final uri = Uri.parse(raw);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    } catch (_) {}
+    await launchUrl(
+      Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
   @override
   Future onBrowserCreated() async {
     if (kDebugMode) {
@@ -183,6 +210,11 @@ class MyInAppBrowser extends InAppBrowser {
   Future onLoadStart(url) async {
     if (kDebugMode) {
       print("\n\nStarted: $url\n\n");
+    }
+    final current = url.toString();
+    if (current.startsWith('wave://') || current.startsWith('intent://')) {
+      await _openExternalUrl(current);
+      return;
     }
     Get.find<OrderController>().paymentRedirect(
       url: url.toString(), canRedirect: _canRedirect, onClose: () => close(),
@@ -228,6 +260,10 @@ class MyInAppBrowser extends InAppBrowser {
     if (kDebugMode) {
       print("Can't load [$url] Error: $message");
     }
+    final failing = url.toString();
+    if (failing.startsWith('wave://') || failing.startsWith('intent://')) {
+      _openExternalUrl(failing);
+    }
   }
 
   @override
@@ -251,6 +287,12 @@ class MyInAppBrowser extends InAppBrowser {
   Future<NavigationActionPolicy> shouldOverrideUrlLoading(navigationAction) async {
     if (kDebugMode) {
       print("\n\nOverride ${navigationAction.request.url}\n\n");
+    }
+    final uri = navigationAction.request.url;
+    final url = uri?.toString() ?? '';
+    if (url.startsWith('wave://') || url.startsWith('intent://')) {
+      await _openExternalUrl(url);
+      return NavigationActionPolicy.CANCEL;
     }
     return NavigationActionPolicy.ALLOW;
   }
