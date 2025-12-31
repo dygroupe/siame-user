@@ -70,6 +70,59 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
     return true;
   }
 
+  /// Gère les URLs Max It et les redirige vers l'application Max It ou le Play Store
+  Future<bool> _handleMaxItUrl(String url, InAppWebViewController controller) async {
+    try {
+      final Uri maxItUri = Uri.parse(url);
+      if (await canLaunchUrl(maxItUri)) {
+        await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+        return true;
+      }
+    } catch (_) {}
+    // Si rien n'a été lancé, ouvrir le Play Store pour Max It
+    await launchUrl(
+      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.maxit'),
+      mode: LaunchMode.externalApplication,
+    );
+    return true;
+  }
+
+  /// Gère les URLs Orange Money et les redirige vers l'application Orange Money ou le Play Store
+  Future<bool> _handleOrangeMoneyUrl(String url, InAppWebViewController controller) async {
+    try {
+      final Uri orangeMoneyUri = Uri.parse(url);
+      if (await canLaunchUrl(orangeMoneyUri)) {
+        await launchUrl(orangeMoneyUri, mode: LaunchMode.externalApplication);
+        return true;
+      }
+    } catch (_) {}
+    // Si rien n'a été lancé, ouvrir le Play Store pour Orange Money
+    await launchUrl(
+      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.orangemoney'),
+      mode: LaunchMode.externalApplication,
+    );
+    return true;
+  }
+
+  /// Détecte le type d'URL de paiement et appelle la fonction appropriée
+  Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
+    // Max It - priorité car c'est l'app préférée
+    if (url.startsWith('maxit://')) {
+      return await _handleMaxItUrl(url, controller);
+    }
+    // Orange Money
+    if (url.startsWith('orangemoney://') || 
+        url.startsWith('orange-money://') || 
+        url.startsWith('om://')) {
+      return await _handleOrangeMoneyUrl(url, controller);
+    }
+    // Wave
+    if (url.startsWith('wave://')) {
+      return await _handleWaveUrl(url, controller);
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,8 +191,12 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               onLoadStart: (controller, url) async {
                 final current = url?.toString() ?? '';
-                if (current.startsWith('wave://')) {
-                  await _handleWaveUrl(current, controller);
+                if (current.startsWith('wave://') || 
+                    current.startsWith('maxit://') || 
+                    current.startsWith('orangemoney://') || 
+                    current.startsWith('orange-money://') || 
+                    current.startsWith('om://')) {
+                  await _handlePaymentUrl(current, controller);
                   return;
                 }
                 Get.find<OrderController>().paymentRedirect(
@@ -154,9 +211,13 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 Uri uri = navigationAction.request.url!;
-                // Intercepte explicitement wave:// et ouvre l'app
-                if (uri.scheme == "wave") {
-                  await _handleWaveUrl(uri.toString(), controller);
+                // Intercepte explicitement les schémas de paiement et ouvre l'app
+                if (uri.scheme == "wave" || 
+                    uri.scheme == "maxit" || 
+                    uri.scheme == "orangemoney" || 
+                    uri.scheme == "orange-money" || 
+                    uri.scheme == "om") {
+                  await _handlePaymentUrl(uri.toString(), controller);
                   return NavigationActionPolicy.CANCEL;
                 }
                 if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
@@ -193,8 +254,12 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               onReceivedError: (controller, request, error) async {
                 final failing = request.url.toString();
-                if (failing.startsWith('wave://')) {
-                  await _handleWaveUrl(failing, controller);
+                if (failing.startsWith('wave://') || 
+                    failing.startsWith('maxit://') || 
+                    failing.startsWith('orangemoney://') || 
+                    failing.startsWith('orange-money://') || 
+                    failing.startsWith('om://')) {
+                  await _handlePaymentUrl(failing, controller);
                   return;
                 }
               },
@@ -202,8 +267,12 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 final uri = action.request.url;
                 if (uri == null) return false;
                 final url = uri.toString();
-                if (url.startsWith('wave://')) {
-                  await _handleWaveUrl(url, controller);
+                if (url.startsWith('wave://') || 
+                    url.startsWith('maxit://') || 
+                    url.startsWith('orangemoney://') || 
+                    url.startsWith('orange-money://') || 
+                    url.startsWith('om://')) {
+                  await _handlePaymentUrl(url, controller);
                   return true; // géré
                 }
                 return false;

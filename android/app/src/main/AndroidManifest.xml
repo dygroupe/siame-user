@@ -34,6 +34,26 @@
             <data android:scheme="wave" />
         </intent>
         <package android:name="com.wave.personal" />
+        <!-- Déclaration des schémas Max It pour permettre l'interaction avec l'application Max It -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="maxit" />
+        </intent>
+        <package android:name="com.orange.maxit" />
+        <!-- Déclaration des schémas Orange Money pour permettre l'interaction avec l'application Orange Money -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="orangemoney" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="orange-money" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="om" />
+        </intent>
+        <package android:name="com.orange.orangemoney" />
     </queries>
 
     <application

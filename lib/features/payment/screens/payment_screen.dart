@@ -173,9 +173,10 @@ class MyInAppBrowser extends InAppBrowser {
 
   final bool _canRedirect = true;
 
-  /// Ouvre une URL externe (Wave ou autre) et gère les fallbacks
+  /// Ouvre une URL externe (Wave, Max It, Orange Money) et gère les fallbacks
   Future<void> _openExternalUrl(String raw) async {
     try {
+      // Wave avec capture
       if (raw.startsWith('wave://capture/')) {
         final String afterCapture = raw.substring('wave://capture/'.length);
         final Uri waveUri = Uri.parse(raw);
@@ -187,16 +188,59 @@ class MyInAppBrowser extends InAppBrowser {
         await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
         return;
       }
+      
+      // Max It
+      if (raw.startsWith('maxit://')) {
+        final Uri maxItUri = Uri.parse(raw);
+        if (await canLaunchUrl(maxItUri)) {
+          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        await launchUrl(
+          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.maxit'),
+          mode: LaunchMode.externalApplication,
+        );
+        return;
+      }
+      
+      // Orange Money
+      if (raw.startsWith('orangemoney://') || 
+          raw.startsWith('orange-money://') || 
+          raw.startsWith('om://')) {
+        final Uri orangeMoneyUri = Uri.parse(raw);
+        if (await canLaunchUrl(orangeMoneyUri)) {
+          await launchUrl(orangeMoneyUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        await launchUrl(
+          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.orangemoney'),
+          mode: LaunchMode.externalApplication,
+        );
+        return;
+      }
+      
+      // Wave standard
+      if (raw.startsWith('wave://')) {
+        final Uri waveUri = Uri.parse(raw);
+        if (await canLaunchUrl(waveUri)) {
+          await launchUrl(waveUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        await launchUrl(
+          Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
+          mode: LaunchMode.externalApplication,
+        );
+        return;
+      }
+      
+      // Autres URLs
       final uri = Uri.parse(raw);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
         return;
       }
     } catch (_) {}
-    await launchUrl(
-      Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
-      mode: LaunchMode.externalApplication,
-    );
+    // Fallback par défaut si aucune URL n'a été lancée
   }
 
   @override
@@ -212,7 +256,12 @@ class MyInAppBrowser extends InAppBrowser {
       print("\n\nStarted: $url\n\n");
     }
     final current = url.toString();
-    if (current.startsWith('wave://') || current.startsWith('intent://')) {
+    if (current.startsWith('wave://') || 
+        current.startsWith('maxit://') || 
+        current.startsWith('orangemoney://') || 
+        current.startsWith('orange-money://') || 
+        current.startsWith('om://') || 
+        current.startsWith('intent://')) {
       await _openExternalUrl(current);
       return;
     }
@@ -261,7 +310,12 @@ class MyInAppBrowser extends InAppBrowser {
       print("Can't load [$url] Error: $message");
     }
     final failing = url.toString();
-    if (failing.startsWith('wave://') || failing.startsWith('intent://')) {
+    if (failing.startsWith('wave://') || 
+        failing.startsWith('maxit://') || 
+        failing.startsWith('orangemoney://') || 
+        failing.startsWith('orange-money://') || 
+        failing.startsWith('om://') || 
+        failing.startsWith('intent://')) {
       _openExternalUrl(failing);
     }
   }
@@ -290,7 +344,12 @@ class MyInAppBrowser extends InAppBrowser {
     }
     final uri = navigationAction.request.url;
     final url = uri?.toString() ?? '';
-    if (url.startsWith('wave://') || url.startsWith('intent://')) {
+    if (url.startsWith('wave://') || 
+        url.startsWith('maxit://') || 
+        url.startsWith('orangemoney://') || 
+        url.startsWith('orange-money://') || 
+        url.startsWith('om://') || 
+        url.startsWith('intent://')) {
       await _openExternalUrl(url);
       return NavigationActionPolicy.CANCEL;
     }
