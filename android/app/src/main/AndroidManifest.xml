@@ -40,6 +40,12 @@
             <data android:scheme="maxit" />
         </intent>
         <package android:name="com.orange.maxit" />
+        <!-- Max It Sénégal (schéma officiel Sonatel : sameaosnapp) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="sameaosnapp" />
+        </intent>
+        <package android:name="com.orange.myorange.osn" />
         <!-- Déclaration des schémas Orange Money pour permettre l'interaction avec l'application Orange Money -->
         <intent>
             <action android:name="android.intent.action.VIEW" />

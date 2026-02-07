@@ -79,9 +79,9 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
         return true;
       }
     } catch (_) {}
-    // Si rien n'a été lancé, ouvrir le Play Store pour Max It
+    // Si rien n'a été lancé, ouvrir le Play Store pour Max It Sénégal
     await launchUrl(
-      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.maxit'),
+      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
       mode: LaunchMode.externalApplication,
     );
     return true;
@@ -106,8 +106,8 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
 
   /// Détecte le type d'URL de paiement et appelle la fonction appropriée
   Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
-    // Max It - priorité car c'est l'app préférée
-    if (url.startsWith('maxit://')) {
+    // Max It (schémas maxit:// et sameaosnapp://)
+    if (url.startsWith('maxit://') || url.startsWith('sameaosnapp://')) {
       return await _handleMaxItUrl(url, controller);
     }
     // Orange Money
@@ -193,6 +193,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 final current = url?.toString() ?? '';
                 if (current.startsWith('wave://') || 
                     current.startsWith('maxit://') || 
+                    current.startsWith('sameaosnapp://') || 
                     current.startsWith('orangemoney://') || 
                     current.startsWith('orange-money://') || 
                     current.startsWith('om://')) {
@@ -214,6 +215,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 // Intercepte explicitement les schémas de paiement et ouvre l'app
                 if (uri.scheme == "wave" || 
                     uri.scheme == "maxit" || 
+                    uri.scheme == "sameaosnapp" || 
                     uri.scheme == "orangemoney" || 
                     uri.scheme == "orange-money" || 
                     uri.scheme == "om") {
@@ -256,6 +258,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 final failing = request.url.toString();
                 if (failing.startsWith('wave://') || 
                     failing.startsWith('maxit://') || 
+                    failing.startsWith('sameaosnapp://') || 
                     failing.startsWith('orangemoney://') || 
                     failing.startsWith('orange-money://') || 
                     failing.startsWith('om://')) {
@@ -269,6 +272,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 final url = uri.toString();
                 if (url.startsWith('wave://') || 
                     url.startsWith('maxit://') || 
+                    url.startsWith('sameaosnapp://') || 
                     url.startsWith('orangemoney://') || 
                     url.startsWith('orange-money://') || 
                     url.startsWith('om://')) {

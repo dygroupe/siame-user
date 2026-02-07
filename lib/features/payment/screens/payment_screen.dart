@@ -197,7 +197,21 @@ class MyInAppBrowser extends InAppBrowser {
           return;
         }
         await launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.maxit'),
+          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
+          mode: LaunchMode.externalApplication,
+        );
+        return;
+      }
+
+      // Max It (schéma officiel Sonatel : sameaosnapp)
+      if (raw.startsWith('sameaosnapp://')) {
+        final Uri maxItUri = Uri.parse(raw);
+        if (await canLaunchUrl(maxItUri)) {
+          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        await launchUrl(
+          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
           mode: LaunchMode.externalApplication,
         );
         return;
@@ -258,6 +272,7 @@ class MyInAppBrowser extends InAppBrowser {
     final current = url.toString();
     if (current.startsWith('wave://') || 
         current.startsWith('maxit://') || 
+        current.startsWith('sameaosnapp://') || 
         current.startsWith('orangemoney://') || 
         current.startsWith('orange-money://') || 
         current.startsWith('om://') || 
@@ -312,6 +327,7 @@ class MyInAppBrowser extends InAppBrowser {
     final failing = url.toString();
     if (failing.startsWith('wave://') || 
         failing.startsWith('maxit://') || 
+        failing.startsWith('sameaosnapp://') || 
         failing.startsWith('orangemoney://') || 
         failing.startsWith('orange-money://') || 
         failing.startsWith('om://') || 
@@ -346,6 +362,7 @@ class MyInAppBrowser extends InAppBrowser {
     final url = uri?.toString() ?? '';
     if (url.startsWith('wave://') || 
         url.startsWith('maxit://') || 
+        url.startsWith('sameaosnapp://') || 
         url.startsWith('orangemoney://') || 
         url.startsWith('orange-money://') || 
         url.startsWith('om://') || 

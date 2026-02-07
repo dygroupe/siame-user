@@ -54,6 +54,12 @@
 	<array>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
+		<string>wave</string>
+		<string>maxit</string>
+		<string>sameaosnapp</string>
+		<string>orangemoney</string>
+		<string>orange-money</string>
+		<string>om</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
