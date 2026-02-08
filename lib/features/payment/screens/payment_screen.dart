@@ -176,6 +176,21 @@ class MyInAppBrowser extends InAppBrowser {
   /// Ouvre une URL externe (Wave, Max It, Orange Money) et gère les fallbacks
   Future<void> _openExternalUrl(String raw) async {
     try {
+      // Fallback store pour Max It : App Store sur iOS, Play Store sur Android
+      final String maxItStoreUrl = defaultTargetPlatform == TargetPlatform.iOS
+          ? 'https://apps.apple.com/app/id1039327980' // Orange Max it Sénégal
+          : 'https://play.google.com/store/apps/details?id=com.orange.myorange.osn';
+
+      // Intent URL (Android) - envoyé par le backend pour Max It
+      if (raw.startsWith('intent://')) {
+        final Uri intentUri = Uri.parse(raw);
+        if (await canLaunchUrl(intentUri)) {
+          await launchUrl(intentUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
+        return;
+      }
       // Wave avec capture
       if (raw.startsWith('wave://capture/')) {
         final String afterCapture = raw.substring('wave://capture/'.length);
@@ -188,7 +203,7 @@ class MyInAppBrowser extends InAppBrowser {
         await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
         return;
       }
-      
+
       // Max It
       if (raw.startsWith('maxit://')) {
         final Uri maxItUri = Uri.parse(raw);
@@ -196,10 +211,7 @@ class MyInAppBrowser extends InAppBrowser {
           await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
           return;
         }
-        await launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
         return;
       }
 
@@ -210,10 +222,7 @@ class MyInAppBrowser extends InAppBrowser {
           await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
           return;
         }
-        await launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
         return;
       }
       
@@ -226,13 +235,13 @@ class MyInAppBrowser extends InAppBrowser {
           await launchUrl(orangeMoneyUri, mode: LaunchMode.externalApplication);
           return;
         }
-        await launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.orange.orangemoney'),
-          mode: LaunchMode.externalApplication,
-        );
+        final String orangeMoneyStoreUrl = defaultTargetPlatform == TargetPlatform.iOS
+            ? 'https://apps.apple.com/app/orange-money-senegal/id1447224280' // Orange Money Sénégal
+            : 'https://play.google.com/store/apps/details?id=com.orange.orangemoney';
+        await launchUrl(Uri.parse(orangeMoneyStoreUrl), mode: LaunchMode.externalApplication);
         return;
       }
-      
+
       // Wave standard
       if (raw.startsWith('wave://')) {
         final Uri waveUri = Uri.parse(raw);
@@ -240,10 +249,10 @@ class MyInAppBrowser extends InAppBrowser {
           await launchUrl(waveUri, mode: LaunchMode.externalApplication);
           return;
         }
-        await launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
-          mode: LaunchMode.externalApplication,
-        );
+        final String waveStoreUrl = defaultTargetPlatform == TargetPlatform.iOS
+            ? 'https://apps.apple.com/app/wave-mobile-money/id1523884528'
+            : 'https://play.google.com/store/apps/details?id=com.wave.personal';
+        await launchUrl(Uri.parse(waveStoreUrl), mode: LaunchMode.externalApplication);
         return;
       }
       

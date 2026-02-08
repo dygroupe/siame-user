@@ -40,7 +40,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   InAppWebViewController? webViewController;
   final GlobalKey webViewKey = GlobalKey();
 
-  /// Gère les URLs Wave et les redirige vers l'application Wave ou le Play Store
+  /// Gère les URLs Wave et les redirige vers l'application Wave ou le store (App Store sur iOS, Play Store sur Android)
   Future<bool> _handleWaveUrl(String url, InAppWebViewController controller) async {
     try {
       if (url.startsWith('wave://capture/')) {
@@ -62,15 +62,14 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
         }
       }
     } catch (_) {}
-    // Si rien n'a été lancé, ouvrir le Play Store
-    await launchUrl(
-      Uri.parse('https://play.google.com/store/apps/details?id=com.wave.personal'),
-      mode: LaunchMode.externalApplication,
-    );
+    final String waveStoreUrl = defaultTargetPlatform == TargetPlatform.iOS
+        ? 'https://apps.apple.com/app/wave-mobile-money/id1523884528'
+        : 'https://play.google.com/store/apps/details?id=com.wave.personal';
+    await launchUrl(Uri.parse(waveStoreUrl), mode: LaunchMode.externalApplication);
     return true;
   }
 
-  /// Gère les URLs Max It et les redirige vers l'application Max It ou le Play Store
+  /// Gère les URLs Max It et les redirige vers l'application Max It ou le store (App Store sur iOS, Play Store sur Android)
   Future<bool> _handleMaxItUrl(String url, InAppWebViewController controller) async {
     try {
       final Uri maxItUri = Uri.parse(url);
@@ -79,15 +78,14 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
         return true;
       }
     } catch (_) {}
-    // Si rien n'a été lancé, ouvrir le Play Store pour Max It Sénégal
-    await launchUrl(
-      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.myorange.osn'),
-      mode: LaunchMode.externalApplication,
-    );
+    final String storeUrl = defaultTargetPlatform == TargetPlatform.iOS
+        ? 'https://apps.apple.com/app/id1039327980' // Orange Max it Sénégal
+        : 'https://play.google.com/store/apps/details?id=com.orange.myorange.osn';
+    await launchUrl(Uri.parse(storeUrl), mode: LaunchMode.externalApplication);
     return true;
   }
 
-  /// Gère les URLs Orange Money et les redirige vers l'application Orange Money ou le Play Store
+  /// Gère les URLs Orange Money et les redirige vers l'application Orange Money ou le store (App Store sur iOS, Play Store sur Android)
   Future<bool> _handleOrangeMoneyUrl(String url, InAppWebViewController controller) async {
     try {
       final Uri orangeMoneyUri = Uri.parse(url);
@@ -96,18 +94,19 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
         return true;
       }
     } catch (_) {}
-    // Si rien n'a été lancé, ouvrir le Play Store pour Orange Money
-    await launchUrl(
-      Uri.parse('https://play.google.com/store/apps/details?id=com.orange.orangemoney'),
-      mode: LaunchMode.externalApplication,
-    );
+    final String orangeMoneyStoreUrl = defaultTargetPlatform == TargetPlatform.iOS
+        ? 'https://apps.apple.com/app/orange-money-senegal/id1447224280' // Orange Money Sénégal
+        : 'https://play.google.com/store/apps/details?id=com.orange.orangemoney';
+    await launchUrl(Uri.parse(orangeMoneyStoreUrl), mode: LaunchMode.externalApplication);
     return true;
   }
 
   /// Détecte le type d'URL de paiement et appelle la fonction appropriée
   Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
-    // Max It (schémas maxit:// et sameaosnapp://)
-    if (url.startsWith('maxit://') || url.startsWith('sameaosnapp://')) {
+    // Max It (schémas maxit://, sameaosnapp:// et intent:// envoyé par le backend sur Android)
+    if (url.startsWith('maxit://') ||
+        url.startsWith('sameaosnapp://') ||
+        url.startsWith('intent://')) {
       return await _handleMaxItUrl(url, controller);
     }
     // Orange Money
@@ -194,6 +193,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 if (current.startsWith('wave://') || 
                     current.startsWith('maxit://') || 
                     current.startsWith('sameaosnapp://') || 
+                    current.startsWith('intent://') || 
                     current.startsWith('orangemoney://') || 
                     current.startsWith('orange-money://') || 
                     current.startsWith('om://')) {
@@ -216,6 +216,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 if (uri.scheme == "wave" || 
                     uri.scheme == "maxit" || 
                     uri.scheme == "sameaosnapp" || 
+                    uri.scheme == "intent" || 
                     uri.scheme == "orangemoney" || 
                     uri.scheme == "orange-money" || 
                     uri.scheme == "om") {
@@ -259,6 +260,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 if (failing.startsWith('wave://') || 
                     failing.startsWith('maxit://') || 
                     failing.startsWith('sameaosnapp://') || 
+                    failing.startsWith('intent://') || 
                     failing.startsWith('orangemoney://') || 
                     failing.startsWith('orange-money://') || 
                     failing.startsWith('om://')) {
@@ -273,6 +275,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 if (url.startsWith('wave://') || 
                     url.startsWith('maxit://') || 
                     url.startsWith('sameaosnapp://') || 
+                    url.startsWith('intent://') || 
                     url.startsWith('orangemoney://') || 
                     url.startsWith('orange-money://') || 
                     url.startsWith('om://')) {
