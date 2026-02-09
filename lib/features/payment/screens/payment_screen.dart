@@ -181,12 +181,23 @@ class MyInAppBrowser extends InAppBrowser {
           ? 'https://apps.apple.com/app/id1039327980' // Orange Max it Sénégal
           : 'https://play.google.com/store/apps/details?id=com.orange.myorange.osn';
 
-      // Intent URL (Android) - envoyé par le backend pour Max It
-      if (raw.startsWith('intent://')) {
-        final Uri intentUri = Uri.parse(raw);
-        if (await canLaunchUrl(intentUri)) {
-          await launchUrl(intentUri, mode: LaunchMode.externalApplication);
-          return;
+      // Intent URL (Android) - envoyé par le backend pour Max It (gère aussi les formats mal formatés)
+      if (raw.startsWith('intent://') || raw.startsWith('intent:/')) {
+        // Corriger le format de l'URL si nécessaire
+        String correctedUrl = raw;
+        if (raw.startsWith('intent:/') && !raw.startsWith('intent://')) {
+          correctedUrl = raw.replaceFirst('intent:/', 'intent://');
+        }
+        try {
+          final Uri intentUri = Uri.parse(correctedUrl);
+          if (await canLaunchUrl(intentUri)) {
+            await launchUrl(intentUri, mode: LaunchMode.externalApplication);
+            return;
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
+          }
         }
         await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
         return;
@@ -204,23 +215,46 @@ class MyInAppBrowser extends InAppBrowser {
         return;
       }
 
-      // Max It
-      if (raw.startsWith('maxit://')) {
-        final Uri maxItUri = Uri.parse(raw);
-        if (await canLaunchUrl(maxItUri)) {
-          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-          return;
+      // Max It (gère aussi les formats mal formatés)
+      if (raw.startsWith('maxit://') || raw.startsWith('maxit:/')) {
+        // Corriger le format de l'URL si nécessaire
+        String correctedUrl = raw;
+        if (raw.startsWith('maxit:/') && !raw.startsWith('maxit://')) {
+          correctedUrl = raw.replaceFirst('maxit:/', 'maxit://');
+        }
+        try {
+          final Uri maxItUri = Uri.parse(correctedUrl);
+          if (await canLaunchUrl(maxItUri)) {
+            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+            return;
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
+          }
         }
         await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
         return;
       }
 
       // Max It (schéma officiel Sonatel : sameaosnapp)
-      if (raw.startsWith('sameaosnapp://')) {
-        final Uri maxItUri = Uri.parse(raw);
-        if (await canLaunchUrl(maxItUri)) {
-          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-          return;
+      // Gère aussi les formats mal formatés (sameaosnapp:/ au lieu de sameaosnapp://)
+      if (raw.startsWith('sameaosnapp://') || raw.startsWith('sameaosnapp:/')) {
+        // Corriger le format de l'URL si nécessaire
+        String correctedUrl = raw;
+        if (raw.startsWith('sameaosnapp:/') && !raw.startsWith('sameaosnapp://')) {
+          correctedUrl = raw.replaceFirst('sameaosnapp:/', 'sameaosnapp://');
+        }
+        try {
+          final Uri maxItUri = Uri.parse(correctedUrl);
+          if (await canLaunchUrl(maxItUri)) {
+            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+            return;
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
+          }
         }
         await launchUrl(Uri.parse(maxItStoreUrl), mode: LaunchMode.externalApplication);
         return;
@@ -279,13 +313,17 @@ class MyInAppBrowser extends InAppBrowser {
       print("\n\nStarted: $url\n\n");
     }
     final current = url.toString();
+    // Intercepte les schémas personnalisés (y compris les formats mal formatés)
     if (current.startsWith('wave://') || 
         current.startsWith('maxit://') || 
         current.startsWith('sameaosnapp://') || 
         current.startsWith('orangemoney://') || 
         current.startsWith('orange-money://') || 
         current.startsWith('om://') || 
-        current.startsWith('intent://')) {
+        current.startsWith('intent://') ||
+        current.startsWith('sameaosnapp:/') ||
+        current.startsWith('maxit:/') ||
+        current.startsWith('intent:/')) {
       await _openExternalUrl(current);
       return;
     }
@@ -334,13 +372,21 @@ class MyInAppBrowser extends InAppBrowser {
       print("Can't load [$url] Error: $message");
     }
     final failing = url.toString();
+    final errorMessage = message.toString();
+    
+    // Gère les erreurs pour les schémas personnalisés (y compris ERR_UNKNOWN_URL_SCHEME)
+    // Gère aussi les formats mal formatés
     if (failing.startsWith('wave://') || 
         failing.startsWith('maxit://') || 
         failing.startsWith('sameaosnapp://') || 
         failing.startsWith('orangemoney://') || 
         failing.startsWith('orange-money://') || 
         failing.startsWith('om://') || 
-        failing.startsWith('intent://')) {
+        failing.startsWith('intent://') ||
+        failing.startsWith('sameaosnapp:/') ||
+        failing.startsWith('maxit:/') ||
+        failing.startsWith('intent:/') ||
+        errorMessage.contains('ERR_UNKNOWN_URL_SCHEME')) {
       _openExternalUrl(failing);
     }
   }
@@ -369,13 +415,17 @@ class MyInAppBrowser extends InAppBrowser {
     }
     final uri = navigationAction.request.url;
     final url = uri?.toString() ?? '';
+    // Intercepte les schémas personnalisés (y compris les formats mal formatés)
     if (url.startsWith('wave://') || 
         url.startsWith('maxit://') || 
         url.startsWith('sameaosnapp://') || 
         url.startsWith('orangemoney://') || 
         url.startsWith('orange-money://') || 
         url.startsWith('om://') || 
-        url.startsWith('intent://')) {
+        url.startsWith('intent://') ||
+        url.startsWith('sameaosnapp:/') ||
+        url.startsWith('maxit:/') ||
+        url.startsWith('intent:/')) {
       await _openExternalUrl(url);
       return NavigationActionPolicy.CANCEL;
     }

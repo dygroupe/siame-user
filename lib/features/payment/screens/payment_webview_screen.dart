@@ -72,12 +72,59 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   /// Gère les URLs Max It et les redirige vers l'application Max It ou le store (App Store sur iOS, Play Store sur Android)
   Future<bool> _handleMaxItUrl(String url, InAppWebViewController controller) async {
     try {
-      final Uri maxItUri = Uri.parse(url);
-      if (await canLaunchUrl(maxItUri)) {
-        await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-        return true;
+      // Corriger le format de l'URL si nécessaire (sameaosnapp:/mp/... -> sameaosnapp://mp/...)
+      String correctedUrl = url;
+      if (url.startsWith('sameaosnapp:/') && !url.startsWith('sameaosnapp://')) {
+        correctedUrl = url.replaceFirst('sameaosnapp:/', 'sameaosnapp://');
+      } else if (url.startsWith('maxit:/') && !url.startsWith('maxit://')) {
+        correctedUrl = url.replaceFirst('maxit:/', 'maxit://');
+      } else if (url.startsWith('intent:/') && !url.startsWith('intent://')) {
+        correctedUrl = url.replaceFirst('intent:/', 'intent://');
       }
-    } catch (_) {}
+      
+      // Si l'URL est valide et complète, essayer de l'ouvrir avec tous ses paramètres
+      if (correctedUrl.isNotEmpty && 
+          (correctedUrl.startsWith('maxit://') || 
+           correctedUrl.startsWith('sameaosnapp://') || 
+           correctedUrl.startsWith('intent://'))) {
+        try {
+          final Uri maxItUri = Uri.parse(correctedUrl);
+          if (await canLaunchUrl(maxItUri)) {
+            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+            return true;
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
+          }
+        }
+      }
+      
+      // Si l'URL est vide ou invalide, essayer d'ouvrir Max It avec les schémas disponibles
+      // Essayer d'abord sameaosnapp:// (schéma officiel Sonatel)
+      try {
+        final Uri sameaosnappUri = Uri.parse('sameaosnapp://');
+        if (await canLaunchUrl(sameaosnappUri)) {
+          await launchUrl(sameaosnappUri, mode: LaunchMode.externalApplication);
+          return true;
+        }
+      } catch (_) {}
+      
+      // Essayer maxit:// comme fallback
+      try {
+        final Uri maxitUri = Uri.parse('maxit://');
+        if (await canLaunchUrl(maxitUri)) {
+          await launchUrl(maxitUri, mode: LaunchMode.externalApplication);
+          return true;
+        }
+      } catch (_) {}
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erreur dans _handleMaxItUrl: $e');
+      }
+    }
+    
+    // Si aucune application n'est disponible, rediriger vers le store
     final String storeUrl = defaultTargetPlatform == TargetPlatform.iOS
         ? 'https://apps.apple.com/app/id1039327980' // Orange Max it Sénégal
         : 'https://play.google.com/store/apps/details?id=com.orange.myorange.osn';
@@ -104,9 +151,13 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   /// Détecte le type d'URL de paiement et appelle la fonction appropriée
   Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
     // Max It (schémas maxit://, sameaosnapp:// et intent:// envoyé par le backend sur Android)
+    // Gère aussi les formats mal formatés (sameaosnapp:/ au lieu de sameaosnapp://)
     if (url.startsWith('maxit://') ||
         url.startsWith('sameaosnapp://') ||
-        url.startsWith('intent://')) {
+        url.startsWith('intent://') ||
+        url.startsWith('maxit:/') ||
+        url.startsWith('sameaosnapp:/') ||
+        url.startsWith('intent:/')) {
       return await _handleMaxItUrl(url, controller);
     }
     // Orange Money
@@ -190,13 +241,17 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               onLoadStart: (controller, url) async {
                 final current = url?.toString() ?? '';
+                // Intercepte les schémas personnalisés (y compris les formats mal formatés)
                 if (current.startsWith('wave://') || 
                     current.startsWith('maxit://') || 
                     current.startsWith('sameaosnapp://') || 
                     current.startsWith('intent://') || 
                     current.startsWith('orangemoney://') || 
                     current.startsWith('orange-money://') || 
-                    current.startsWith('om://')) {
+                    current.startsWith('om://') ||
+                    current.startsWith('sameaosnapp:/') ||
+                    current.startsWith('maxit:/') ||
+                    current.startsWith('intent:/')) {
                   await _handlePaymentUrl(current, controller);
                   return;
                 }
@@ -212,15 +267,21 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 Uri uri = navigationAction.request.url!;
+                final urlString = uri.toString();
+                
                 // Intercepte explicitement les schémas de paiement et ouvre l'app
+                // Vérifie aussi les URLs mal formatées (sameaosnapp:/ au lieu de sameaosnapp://)
                 if (uri.scheme == "wave" || 
                     uri.scheme == "maxit" || 
                     uri.scheme == "sameaosnapp" || 
                     uri.scheme == "intent" || 
                     uri.scheme == "orangemoney" || 
                     uri.scheme == "orange-money" || 
-                    uri.scheme == "om") {
-                  await _handlePaymentUrl(uri.toString(), controller);
+                    uri.scheme == "om" ||
+                    urlString.startsWith('sameaosnapp:/') ||
+                    urlString.startsWith('maxit:/') ||
+                    urlString.startsWith('intent:/')) {
+                  await _handlePaymentUrl(urlString, controller);
                   return NavigationActionPolicy.CANCEL;
                 }
                 if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
@@ -257,13 +318,26 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               onReceivedError: (controller, request, error) async {
                 final failing = request.url.toString();
+                
+                // Gère les erreurs pour les schémas personnalisés (y compris ERR_UNKNOWN_URL_SCHEME)
+                // Gère aussi les formats mal formatés
                 if (failing.startsWith('wave://') || 
                     failing.startsWith('maxit://') || 
                     failing.startsWith('sameaosnapp://') || 
                     failing.startsWith('intent://') || 
                     failing.startsWith('orangemoney://') || 
                     failing.startsWith('orange-money://') || 
-                    failing.startsWith('om://')) {
+                    failing.startsWith('om://') ||
+                    failing.startsWith('sameaosnapp:/') ||
+                    failing.startsWith('maxit:/') ||
+                    failing.startsWith('intent:/') ||
+                    error.description.contains('ERR_UNKNOWN_URL_SCHEME')) {
+                  // Si c'est une erreur de schéma inconnu, essayer d'ouvrir l'URL directement
+                  if (error.description.contains('ERR_UNKNOWN_URL_SCHEME') && 
+                      (failing.startsWith('sameaosnapp') || failing.startsWith('maxit') || failing.startsWith('intent'))) {
+                    await _handleMaxItUrl(failing, controller);
+                    return;
+                  }
                   await _handlePaymentUrl(failing, controller);
                   return;
                 }
@@ -272,13 +346,17 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 final uri = action.request.url;
                 if (uri == null) return false;
                 final url = uri.toString();
+                // Intercepte les schémas personnalisés (y compris les formats mal formatés)
                 if (url.startsWith('wave://') || 
                     url.startsWith('maxit://') || 
                     url.startsWith('sameaosnapp://') || 
                     url.startsWith('intent://') || 
                     url.startsWith('orangemoney://') || 
                     url.startsWith('orange-money://') || 
-                    url.startsWith('om://')) {
+                    url.startsWith('om://') ||
+                    url.startsWith('sameaosnapp:/') ||
+                    url.startsWith('maxit:/') ||
+                    url.startsWith('intent:/')) {
                   await _handlePaymentUrl(url, controller);
                   return true; // géré
                 }
