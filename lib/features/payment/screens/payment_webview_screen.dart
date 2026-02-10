@@ -81,43 +81,23 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
       } else if (url.startsWith('intent:/') && !url.startsWith('intent://')) {
         correctedUrl = url.replaceFirst('intent:/', 'intent://');
       }
-      
-      // Si l'URL est valide et complète, essayer de l'ouvrir avec tous ses paramètres
-      if (correctedUrl.isNotEmpty && 
-          (correctedUrl.startsWith('maxit://') || 
-           correctedUrl.startsWith('sameaosnapp://') || 
-           correctedUrl.startsWith('intent://'))) {
+
+      // Toujours tenter l'URL complète (avec paramètres). `canLaunchUrl` peut retourner false
+      // pour des schémas personnalisés même quand `launchUrl` fonctionne.
+      if (correctedUrl.isNotEmpty &&
+          (correctedUrl.startsWith('maxit://') ||
+              correctedUrl.startsWith('sameaosnapp://') ||
+              correctedUrl.startsWith('intent://'))) {
         try {
           final Uri maxItUri = Uri.parse(correctedUrl);
-          if (await canLaunchUrl(maxItUri)) {
-            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-            return true;
-          }
+          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+          return true;
         } catch (e) {
           if (kDebugMode) {
             print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
           }
         }
       }
-      
-      // Si l'URL est vide ou invalide, essayer d'ouvrir Max It avec les schémas disponibles
-      // Essayer d'abord sameaosnapp:// (schéma officiel Sonatel)
-      try {
-        final Uri sameaosnappUri = Uri.parse('sameaosnapp://');
-        if (await canLaunchUrl(sameaosnappUri)) {
-          await launchUrl(sameaosnappUri, mode: LaunchMode.externalApplication);
-          return true;
-        }
-      } catch (_) {}
-      
-      // Essayer maxit:// comme fallback
-      try {
-        final Uri maxitUri = Uri.parse('maxit://');
-        if (await canLaunchUrl(maxitUri)) {
-          await launchUrl(maxitUri, mode: LaunchMode.externalApplication);
-          return true;
-        }
-      } catch (_) {}
     } catch (e) {
       if (kDebugMode) {
         print('Erreur dans _handleMaxItUrl: $e');

@@ -190,10 +190,8 @@ class MyInAppBrowser extends InAppBrowser {
         }
         try {
           final Uri intentUri = Uri.parse(correctedUrl);
-          if (await canLaunchUrl(intentUri)) {
-            await launchUrl(intentUri, mode: LaunchMode.externalApplication);
-            return;
-          }
+          await launchUrl(intentUri, mode: LaunchMode.externalApplication);
+          return;
         } catch (e) {
           if (kDebugMode) {
             print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
@@ -224,10 +222,8 @@ class MyInAppBrowser extends InAppBrowser {
         }
         try {
           final Uri maxItUri = Uri.parse(correctedUrl);
-          if (await canLaunchUrl(maxItUri)) {
-            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-            return;
-          }
+          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+          return;
         } catch (e) {
           if (kDebugMode) {
             print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
@@ -247,10 +243,8 @@ class MyInAppBrowser extends InAppBrowser {
         }
         try {
           final Uri maxItUri = Uri.parse(correctedUrl);
-          if (await canLaunchUrl(maxItUri)) {
-            await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
-            return;
-          }
+          await launchUrl(maxItUri, mode: LaunchMode.externalApplication);
+          return;
         } catch (e) {
           if (kDebugMode) {
             print('Erreur lors de l\'ouverture de Max It avec l\'URL: $correctedUrl - $e');
