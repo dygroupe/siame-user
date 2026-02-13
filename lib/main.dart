@@ -11,8 +11,10 @@ import 'package:sixam_mart/helper/address_helper.dart';
 import 'package:sixam_mart/helper/auth_helper.dart';
 import 'package:sixam_mart/helper/notification_helper.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
+import 'package:sixam_mart/helper/deep_link_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/theme/dark_theme.dart';
+import 'package:app_links/app_links.dart';
 import 'package:sixam_mart/theme/light_theme.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/util/messages.dart';
@@ -77,6 +79,20 @@ Future<void> main() async {
     }
   }catch(_) {}
 
+  if (GetPlatform.isMobile) {
+    try {
+      final appLinks = AppLinks();
+      final initial = await appLinks.getInitialLink();
+      final uri = initial is Uri ? initial : (initial != null ? Uri.tryParse(initial.toString()) : null);
+      if (uri != null) {
+        final url = uri.toString();
+        if (DeepLinkHelper.isPaymentDeepLink(url)) {
+          DeepLinkHelper.initialPaymentDeepLink = url;
+        }
+      }
+    } catch (_) {}
+  }
+
   if (ResponsiveHelper.isWeb()) {
     await FacebookAuth.instance.webAndDesktopInitialize(
       appId: "380903914182154",
@@ -103,8 +119,29 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
     _route();
+    if (GetPlatform.isMobile) {
+      _listenToPaymentDeepLinks();
+    }
+  }
+
+  void _listenToPaymentDeepLinks() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppLinks().uriLinkStream.listen((Uri? uri) {
+        if (uri == null) return;
+        final url = uri.toString();
+        if (!DeepLinkHelper.isPaymentDeepLink(url)) return;
+        final payload = DeepLinkHelper.parsePaymentDeepLink(url);
+        if (payload != null) {
+          Get.offNamed(RouteHelper.getOrderSuccessRoute(
+            payload.orderId,
+            payload.contactNumber,
+            createAccount: payload.createAccount,
+            guestId: payload.guestId,
+          ));
+        }
+      });
+    });
   }
 
   void _route() async {

@@ -6,12 +6,27 @@ import 'package:sixam_mart/features/notification/domain/models/notification_body
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/helper/address_helper.dart';
 import 'package:sixam_mart/helper/auth_helper.dart';
+import 'package:sixam_mart/helper/deep_link_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
 // class SplashRouteHelper{
 
   void route({NotificationBodyModel? body}) {
+    final paymentDeepLink = DeepLinkHelper.takeInitialPaymentDeepLink();
+    if (paymentDeepLink != null) {
+      final payload = DeepLinkHelper.parsePaymentDeepLink(paymentDeepLink);
+      if (payload != null) {
+        Get.offNamed(RouteHelper.getOrderSuccessRoute(
+          payload.orderId,
+          payload.contactNumber,
+          createAccount: payload.createAccount,
+          guestId: payload.guestId,
+        ));
+        return;
+      }
+    }
+
     double? minimumVersion = _getMinimumVersion();
     bool isMaintenanceMode = Get.find<SplashController>().configModel!.maintenanceMode!;
     bool needsUpdate = AppConstants.appVersion < minimumVersion!;

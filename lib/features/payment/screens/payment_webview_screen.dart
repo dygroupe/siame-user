@@ -12,6 +12,8 @@ import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:sixam_mart/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:sixam_mart/features/wallet/widgets/fund_payment_dialog_widget.dart';
+import 'package:sixam_mart/helper/deep_link_helper.dart';
+import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PaymentWebViewScreen extends StatefulWidget {
@@ -118,6 +120,10 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
 
   /// Détecte le type d'URL de paiement et appelle la fonction appropriée
   Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
+    // Deep link retour Wave -> Siame (après paiement réussi/échoué)
+    if (DeepLinkHelper.isPaymentDeepLink(url)) {
+      return await _handleSiamePaymentDeepLink(url);
+    }
     // Max It (schémas maxit://, sameaosnapp:// et intent:// envoyé par le backend sur Android)
     // Gère aussi les formats mal formatés (sameaosnapp:/ au lieu de sameaosnapp://)
     if (url.startsWith('maxit://') ||
@@ -146,7 +152,11 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
     super.initState();
 
     if(widget.addFundUrl == '' && widget.addFundUrl!.isEmpty && widget.subscriptionUrl == '' && widget.subscriptionUrl!.isEmpty){
-      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId == 0 ? widget.guestId : widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}';
+      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId == 0 ? widget.guestId : widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}'
+          '&payment_platform=app'
+          '&guest_id=${Uri.encodeComponent(widget.guestId)}'
+          '&create_account=${widget.createAccount == true}'
+          '&contact_number=${Uri.encodeComponent(widget.contactNumber)}';
     } else if(widget.subscriptionUrl != '' && widget.subscriptionUrl!.isNotEmpty){
       selectedUrl = widget.subscriptionUrl!;
     } else{
@@ -210,7 +220,8 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               onLoadStart: (controller, url) async {
                 final current = url?.toString() ?? '';
                 // Intercepte les schémas personnalisés (y compris les formats mal formatés)
-                if (current.startsWith('wave://') || 
+                if (current.startsWith('siame://') ||
+                    current.startsWith('wave://') || 
                     current.startsWith('maxit://') || 
                     current.startsWith('sameaosnapp://') || 
                     current.startsWith('intent://') || 
@@ -239,7 +250,8 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 
                 // Intercepte explicitement les schémas de paiement et ouvre l'app
                 // Vérifie aussi les URLs mal formatées (sameaosnapp:/ au lieu de sameaosnapp://)
-                if (uri.scheme == "wave" || 
+                if (uri.scheme == "siame" ||
+                    uri.scheme == "wave" || 
                     uri.scheme == "maxit" || 
                     uri.scheme == "sameaosnapp" || 
                     uri.scheme == "intent" || 
@@ -289,7 +301,8 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 
                 // Gère les erreurs pour les schémas personnalisés (y compris ERR_UNKNOWN_URL_SCHEME)
                 // Gère aussi les formats mal formatés
-                if (failing.startsWith('wave://') || 
+                if (failing.startsWith('siame://') ||
+                    failing.startsWith('wave://') || 
                     failing.startsWith('maxit://') || 
                     failing.startsWith('sameaosnapp://') || 
                     failing.startsWith('intent://') || 
@@ -315,7 +328,8 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 if (uri == null) return false;
                 final url = uri.toString();
                 // Intercepte les schémas personnalisés (y compris les formats mal formatés)
-                if (url.startsWith('wave://') || 
+                if (url.startsWith('siame://') ||
+                    url.startsWith('wave://') || 
                     url.startsWith('maxit://') || 
                     url.startsWith('sameaosnapp://') || 
                     url.startsWith('intent://') || 

@@ -27,6 +27,16 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Siame Payment Return</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>siame</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.926015535595-j75110jro3du9im0ikkukd5hbgjsio66</string>
