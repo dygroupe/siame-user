@@ -118,6 +118,19 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
     return true;
   }
 
+  /// Traite le deep link Siame (siame://payment?...) après retour du paiement (Wave, etc.)
+  Future<bool> _handleSiamePaymentDeepLink(String url) async {
+    final payload = DeepLinkHelper.parsePaymentDeepLink(url);
+    if (payload == null) return false;
+    Get.offNamed(RouteHelper.getOrderSuccessRoute(
+      payload.orderId,
+      payload.contactNumber,
+      createAccount: payload.createAccount,
+      guestId: payload.guestId,
+    ));
+    return true;
+  }
+
   /// Détecte le type d'URL de paiement et appelle la fonction appropriée
   Future<bool> _handlePaymentUrl(String url, InAppWebViewController controller) async {
     // Deep link retour Wave -> Siame (après paiement réussi/échoué)
