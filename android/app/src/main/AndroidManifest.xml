@@ -105,12 +105,12 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Deep link retour Wave : siame://payment après paiement réussi/échoué -->
+            <!-- Deep link retour Wave/Orange Money : siame://payment (pas de pathPrefix pour accepter path vide) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="siame" android:host="payment" android:pathPrefix="/" />
+                <data android:scheme="siame" android:host="payment" />
             </intent-filter>
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />

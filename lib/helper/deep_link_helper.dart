@@ -11,6 +11,7 @@ class DeepLinkHelper {
 
   static const String statusSuccess = 'success';
   static const String statusFailed = 'failed';
+  static const String statusFail = 'fail'; // alias envoyé par le backend
   static const String statusCancel = 'cancel';
 
   /// Lien initial reçu au lancement (cold start) — utilisé par le splash pour rediriger.
@@ -66,6 +67,6 @@ class PaymentDeepLinkPayload {
   });
 
   bool get isSuccess => DeepLinkHelper.statusSuccess == status;
-  bool get isFailed => DeepLinkHelper.statusFailed == status;
+  bool get isFailed => DeepLinkHelper.statusFailed == status || DeepLinkHelper.statusFail == status;
   bool get isCancel => DeepLinkHelper.statusCancel == status;
 }

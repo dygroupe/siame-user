@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retour à l'application Siame</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    .btn { display: inline-block; padding: 1rem 2rem; background: #e65100; color: #fff; text-decoration: none; border-radius: 8px; margin: 1rem; font-weight: bold; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <h1>Paiement terminé</h1>
+  <p>Cliquez sur le bouton ci-dessous pour retourner dans l'application Siame.</p>
+
+  <!--
+    IMPORTANT pour que le deep link fonctionne depuis le navigateur :
+    1. Utiliser un vrai <a href="siame://..."> (pas seulement window.location en JS).
+    2. L'URL doit contenir au minimum : order_id et status (success | failed | cancel).
+    3. Paramètres optionnels : contact_number, guest_id, create_account=true
+  -->
+  <a id="open-app" href="siame://payment?order_id=ORDER_ID_PLACEHOLDER&status=success" class="btn">
+    Ouvrir l'application Siame
+  </a>
+
+  <p style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
+    Si l'application ne s'ouvre pas, rouvrez-la manuellement pour voir le résultat du paiement.
+  </p>
+
+  <script>
+    // Optionnel : remplacer ORDER_ID_PLACEHOLDER et status par les vrais paramètres (ex. depuis l'URL de la page)
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var orderId = params.get('order_id') || 'ORDER_ID_PLACEHOLDER';
+      var status = params.get('status') || 'success';
+      var contactNumber = params.get('contact_number') || '';
+      var guestId = params.get('guest_id') || '';
+      var createAccount = params.get('create_account') || '';
+
+      var base = 'siame://payment?order_id=' + encodeURIComponent(orderId) + '&status=' + encodeURIComponent(status);
+      if (contactNumber) base += '&contact_number=' + encodeURIComponent(contactNumber);
+      if (guestId) base += '&guest_id=' + encodeURIComponent(guestId);
+      if (createAccount) base += '&create_account=' + encodeURIComponent(createAccount);
+
+      document.getElementById('open-app').href = base;
+    })();
+  </script>
+</body>
+</html>
