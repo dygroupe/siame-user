@@ -71,7 +71,7 @@ class ReviewWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                 child: CustomImage(
                   image: review.itemImageFullUrl ?? '',
-                  height: 45, width: 45, fit: BoxFit.cover,
+                  height: 45, width: 45, fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -104,7 +104,7 @@ class ReviewWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                 child: CustomImage(
                   image: review.itemImageFullUrl ?? '',
-                  height: 45, width: 45, fit: BoxFit.cover,
+                  height: 45, width: 45, fit: BoxFit.contain,
                 ),
               ),
 

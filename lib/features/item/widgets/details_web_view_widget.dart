@@ -112,7 +112,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(Dimensions.radiusMedium),
                                 child: CustomImage(
-                                  fit: BoxFit.cover, 
+                                  fit: BoxFit.contain, 
                                   height: Get.size.height * 0.5, 
                                   width: double.infinity,
                                   image: imageList[safeProductSelect],
@@ -200,7 +200,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(Dimensions.radiusMedium),
                                     child: CustomImage(
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                       image: imageUrl,
                                     ),
                                   ),

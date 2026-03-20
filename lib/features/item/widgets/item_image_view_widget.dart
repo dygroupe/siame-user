@@ -113,6 +113,7 @@ class ItemImageViewWidget extends StatelessWidget {
                       image: imageUrl,
                       height: 200,
                       width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.contain,
                       useHighQuality: true, // Haute qualité pour les images de détail
                     ),
                   );

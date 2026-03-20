@@ -122,7 +122,7 @@ class ItemWidget extends StatelessWidget {
                           child: CustomImage(
                             isHovered: hovered,
                             image: '${isStore ? store != null ? store!.logoFullUrl : '' : item!.imageFullUrl}',
-                            height: imageHeight ?? (desktop ? 120 : length == null ? 100 : 90), width: imageWidth ?? (desktop ? 120 : 90), fit: BoxFit.cover,
+                            height: imageHeight ?? (desktop ? 120 : length == null ? 100 : 90), width: imageWidth ?? (desktop ? 120 : 90), fit: BoxFit.contain,
                           ),
                         ),
 

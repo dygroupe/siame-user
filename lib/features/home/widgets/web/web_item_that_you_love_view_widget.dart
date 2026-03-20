@@ -93,7 +93,7 @@ class _WebItemThatYouLoveViewWidgetState extends State<WebItemThatYouLoveViewWid
                                         child: CustomImage(
                                           isHovered: hovered,
                                           image: '${recommendItems[index].imageFullUrl}',
-                                          fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                                          fit: BoxFit.contain, width: double.infinity, height: double.infinity,
                                         ),
                                       ),
                                     ),
@@ -290,7 +290,7 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
                                       child: CustomImage(
                                         isHovered: hovered,
                                         image: '${recommendItems[index].imageFullUrl}',
-                                        fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                                        fit: BoxFit.contain, width: double.infinity, height: double.infinity,
                                       ),
                                     ),
                                   ),

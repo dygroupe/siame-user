@@ -18,6 +18,34 @@ class CustomImage extends StatelessWidget {
   final bool useHighQuality;
   const CustomImage({super.key, required this.image, this.height, this.width, this.fit = BoxFit.cover, this.isNotification = false, this.placeholder = '', this.isHovered = false, this.color, this.useHighQuality = false});
 
+  Widget _buildPlaceholder(int? cacheHeight, int? cacheWidth, {BoxFit? customFit}) {
+    return Image.asset(
+      placeholder.isNotEmpty ? placeholder : (isNotification ? Images.notificationPlaceholder : Images.placeholder),
+      height: height,
+      width: width,
+      fit: customFit ?? fit,
+      color: color,
+      cacheHeight: cacheHeight,
+      cacheWidth: cacheWidth,
+    );
+  }
+
+  Widget _buildNetworkImage(String cleanedImageUrl, int? cacheHeight, int? cacheWidth, {BoxFit? customFit}) {
+    return CachedNetworkImage(
+      color: color,
+      imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=$cleanedImageUrl' : cleanedImageUrl,
+      height: height,
+      width: width,
+      fit: customFit ?? fit,
+      memCacheHeight: useHighQuality ? null : cacheHeight,
+      memCacheWidth: useHighQuality ? null : cacheWidth,
+      maxHeightDiskCache: useHighQuality ? null : (cacheHeight != null && cacheHeight > 0 ? (cacheHeight * 1.5).round() : null),
+      maxWidthDiskCache: useHighQuality ? null : (cacheWidth != null && cacheWidth > 0 ? (cacheWidth * 1.5).round() : null),
+      placeholder: (context, url) => _buildPlaceholder(cacheHeight, cacheWidth, customFit: customFit),
+      errorWidget: (context, url, error) => _buildPlaceholder(cacheHeight, cacheWidth, customFit: customFit),
+    );
+  }
+
   // Calcule cacheHeight et cacheWidth pour optimiser la mémoire GPU
   // Utilise la densité d'écran pour déterminer la taille optimale
   int? _getCacheHeight(BuildContext context) {
@@ -71,47 +99,31 @@ class CustomImage extends StatelessWidget {
     final cleanedImageUrl = ImageHelper.cleanImageUrl(image);
     if (cleanedImageUrl == null) {
       // Afficher un placeholder si l'URL est invalide
-      return Image.asset(
-        placeholder.isNotEmpty ? placeholder : (isNotification ? Images.notificationPlaceholder : Images.placeholder),
-        height: height,
-        width: width,
-        fit: fit,
-        color: color,
-      );
+      return _buildPlaceholder(cacheHeight, cacheWidth);
     }
     
     return AnimatedScale(
       scale: isHovered ? 1.1 : 1.0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      child: CachedNetworkImage(
-        color: color,
-        imageUrl: kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=$cleanedImageUrl' : cleanedImageUrl,
-        height: height,
-        width: width,
-        fit: fit,
-        // Optimisation mémoire GPU : limite la résolution des images en cache
-        // Pour les images haute qualité, on désactive les limitations de cache
-        memCacheHeight: useHighQuality ? null : cacheHeight,
-        memCacheWidth: useHighQuality ? null : cacheWidth,
-        // Optimisation mémoire GPU : limite la résolution des images lors du chargement
-        maxHeightDiskCache: useHighQuality ? null : (cacheHeight != null && cacheHeight! > 0 ? (cacheHeight! * 1.5).round() : null),
-        maxWidthDiskCache: useHighQuality ? null : (cacheWidth != null && cacheWidth! > 0 ? (cacheWidth! * 1.5).round() : null),
-        placeholder: (context, url) => Image.asset(
-          placeholder.isNotEmpty ? placeholder : (isNotification ? Images.notificationPlaceholder : Images.placeholder),
-          height: height, width: width, fit: fit, color: color,
-          // Optimisation pour les images locales aussi
-          cacheHeight: cacheHeight,
-          cacheWidth: cacheWidth,
-        ),
-        errorWidget: (context, url, error) => Image.asset(
-          placeholder.isNotEmpty ? placeholder : (isNotification ? Images.notificationPlaceholder : Images.placeholder),
-          height: height, width: width, fit: fit, color: color,
-          // Optimisation pour les images locales aussi
-          cacheHeight: cacheHeight,
-          cacheWidth: cacheWidth,
-        ),
-      ),
+      child: fit == BoxFit.contain
+          ? SizedBox(
+              height: height,
+              width: width,
+              child: ClipRect(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Opacity(
+                      opacity: 0.20,
+                      child: _buildNetworkImage(cleanedImageUrl, cacheHeight, cacheWidth, customFit: BoxFit.cover),
+                    ),
+                    _buildNetworkImage(cleanedImageUrl, cacheHeight, cacheWidth, customFit: BoxFit.contain),
+                  ],
+                ),
+              ),
+            )
+          : _buildNetworkImage(cleanedImageUrl, cacheHeight, cacheWidth),
     );
   }
 }

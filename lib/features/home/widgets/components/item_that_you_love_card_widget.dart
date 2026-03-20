@@ -56,7 +56,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
                         child: CustomImage(
                           isHovered: hovered,
                           image: '${item.imageFullUrl}',
-                          fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                          fit: BoxFit.contain, width: double.infinity, height: double.infinity,
                         ),
                       ),
                     ),

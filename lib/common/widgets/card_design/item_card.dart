@@ -63,7 +63,7 @@ class ItemCard extends StatelessWidget {
                             isHovered: isHovered,
                             placeholder: Images.placeholder,
                             image: '${item.imageFullUrl}',
-                            fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                            fit: BoxFit.contain, width: double.infinity, height: double.infinity,
                           ),
                         ),
                       ),

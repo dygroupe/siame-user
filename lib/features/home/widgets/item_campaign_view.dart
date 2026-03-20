@@ -60,7 +60,7 @@ class ItemCampaignView extends StatelessWidget {
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(Dimensions.radiusSmall)),
                             child: CustomImage(
                               image: '${campaignController.itemCampaignList![index].imageFullUrl}',
-                              height: 90, width: 130, fit: BoxFit.cover,
+                              height: 90, width: 130, fit: BoxFit.contain,
                             ),
                           ),
                           DiscountTag(

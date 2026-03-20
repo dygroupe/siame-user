@@ -112,7 +112,7 @@ class _FlashSaleCardState extends State<FlashSaleCard> {
                           child: CustomImage(
                             isHovered: hovered,
                             image: '${activeProduct.item!.imageFullUrl}',
-                            fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                            fit: BoxFit.contain, width: double.infinity, height: double.infinity,
                           ),
                         ),
 

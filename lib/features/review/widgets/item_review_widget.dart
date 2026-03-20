@@ -78,7 +78,7 @@ class _ItemReviewWidgetState extends State<ItemReviewWidget> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                       child: CustomImage(
-                        height: 70, width: 85, fit: BoxFit.cover,
+                        height: 70, width: 85, fit: BoxFit.contain,
                         image: '${widget.orderDetailsList[index].imageFullUrl}',
                       ),
                     ),

@@ -70,7 +70,7 @@ class PopularItemView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                                 child: CustomImage(
                                   image: '${itemList[index].imageFullUrl}',
-                                  height: 80, width: 80, fit: BoxFit.cover,
+                                  height: 80, width: 80, fit: BoxFit.contain,
                                 ),
                               ),
 
