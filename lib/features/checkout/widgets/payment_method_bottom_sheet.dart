@@ -80,18 +80,19 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 550,
-      child: GetBuilder<CheckoutController>(builder: (checkoutController) {
+    return GetBuilder<CheckoutController>(builder: (checkoutController) {
         bool disablePayments = checkoutController.paymentMethodIndex == 1 && !checkoutController.isPartialPay;
 
-        return Container(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.vertical(top: const Radius.circular(Dimensions.radiusLarge), bottom: Radius.circular(ResponsiveHelper.isDesktop(context) ? Dimensions.radiusLarge : 0)),
-          ),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            constraints: BoxConstraints(maxWidth: 550, maxHeight: MediaQuery.of(context).size.height * 0.8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.vertical(top: const Radius.circular(Dimensions.radiusLarge), bottom: Radius.circular(ResponsiveHelper.isDesktop(context) ? Dimensions.radiusLarge : 0)),
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
 
             ResponsiveHelper.isDesktop(context) ? Align(
               alignment: Alignment.topRight,
@@ -222,10 +223,10 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
               ),
             ),
 
-          ]),
+            ]),
+          ),
         );
-      }),
-    );
+      });
   }
 
   Widget changeAmountView(CheckoutController checkoutController) {
@@ -300,9 +301,12 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           child: Row(children: [
 
-            image != null ? CustomImage(
-              height: 15, fit: BoxFit.contain,
-              image: image, color: disablePayments ? Theme.of(context).disabledColor : null,
+            image != null ? SizedBox(
+              width: 15, height: 15,
+              child: CustomImage(
+                width: 15, height: 15, fit: BoxFit.contain,
+                image: image, color: disablePayments ? Theme.of(context).disabledColor : null,
+              ),
             ) : const SizedBox(),
             const SizedBox(width: Dimensions.paddingSizeSmall),
 

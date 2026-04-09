@@ -26,7 +26,7 @@ class OfflinePaymentButton extends StatelessWidget {
     return (isOfflinePaymentActive && offlineMethodList != null && offlineMethodList!.isNotEmpty) ? InkWell(
       onTap: onTap as void Function()?,
       child: Container(
-        width: Dimensions.webMaxWidth,
+        width: double.infinity,
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -146,14 +146,11 @@ class OfflinePaymentTooltipNoteWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const SizedBox(width: Dimensions.paddingSizeSmall),
-        Expanded(
-          flex: 0,
-          child: Container(
-            height: 5, width: 5,
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              shape: BoxShape.circle,
-            ),
+        Container(
+          height: 5, width: 5,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            shape: BoxShape.circle,
           ),
         ),
         const SizedBox(width: Dimensions.paddingSizeSmall),

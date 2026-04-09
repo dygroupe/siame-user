@@ -36,7 +36,7 @@ class PaymentSection extends StatelessWidget {
                   isCashOnDeliveryActive: isCashOnDeliveryActive, isDigitalPaymentActive: isDigitalPaymentActive,
                   isWalletActive: isWalletActive, storeId: storeId, totalPrice: total, isOfflinePaymentActive: isOfflinePaymentActive,
                 ),
-                backgroundColor: Colors.transparent, isScrollControlled: true,
+                backgroundColor: Colors.transparent, isScrollControlled: true, useRootNavigator: true,
               );
             }else{
               showCustomSnackBar('no_payment_method_found'.tr);
