@@ -112,6 +112,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="siame" android:host="payment" />
             </intent-filter>
+            
+            <!-- App Links pour les produits (Catalogue Facebook etc) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="sen.siame.shop" android:pathPrefix="/item" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />

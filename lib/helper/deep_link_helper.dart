@@ -22,6 +22,13 @@ class DeepLinkHelper {
     return link;
   }
 
+  static String? initialItemDeepLink;
+  static String? takeInitialItemDeepLink() {
+    final link = initialItemDeepLink;
+    initialItemDeepLink = null;
+    return link;
+  }
+
   /// Vérifie si l'URL est un deep link de retour paiement Siame.
   static bool isPaymentDeepLink(String? url) {
     if (url == null || url.isEmpty) return false;
@@ -48,6 +55,25 @@ class DeepLinkHelper {
       guestId: uri.queryParameters[paramGuestId] ?? '',
       createAccount: uri.queryParameters[paramCreateAccount] == 'true',
     );
+  }
+
+  /// Vérifie si l'URL est un App Link pointant vers un produit (/item/{id}).
+  static bool isItemDeepLink(String? url) {
+    if (url == null || url.isEmpty) return false;
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    return (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host == 'sen.siame.shop' &&
+        uri.pathSegments.isNotEmpty &&
+        uri.pathSegments.first == 'item';
+  }
+
+  /// Parse l'ID du produit depuis l'URL.
+  static int? parseItemDeepLink(String? url) {
+    if (!isItemDeepLink(url)) return null;
+    final uri = Uri.tryParse(url!);
+    if (uri == null || uri.pathSegments.length < 2) return null;
+    return int.tryParse(uri.pathSegments[1]);
   }
 }
 

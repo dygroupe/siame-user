@@ -27,6 +27,15 @@ import 'package:sixam_mart/util/app_constants.dart';
       }
     }
 
+    final itemDeepLink = DeepLinkHelper.takeInitialItemDeepLink();
+    if (itemDeepLink != null) {
+      final itemId = DeepLinkHelper.parseItemDeepLink(itemDeepLink);
+      if (itemId != null) {
+        Get.offNamed(RouteHelper.getItemDetailsRoute(itemId, false));
+        return;
+      }
+    }
+
     double? minimumVersion = _getMinimumVersion();
     bool isMaintenanceMode = Get.find<SplashController>().configModel!.maintenanceMode!;
     bool needsUpdate = AppConstants.appVersion < minimumVersion!;

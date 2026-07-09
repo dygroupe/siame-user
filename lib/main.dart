@@ -88,6 +88,8 @@ Future<void> main() async {
         final url = uri.toString();
         if (DeepLinkHelper.isPaymentDeepLink(url)) {
           DeepLinkHelper.initialPaymentDeepLink = url;
+        } else if (DeepLinkHelper.isItemDeepLink(url)) {
+          DeepLinkHelper.initialItemDeepLink = url;
         }
       }
     } catch (_) {}
@@ -121,24 +123,31 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _route();
     if (GetPlatform.isMobile) {
-      _listenToPaymentDeepLinks();
+      _listenToAppLinks();
     }
   }
 
-  void _listenToPaymentDeepLinks() {
+  void _listenToAppLinks() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppLinks().uriLinkStream.listen((Uri? uri) {
         if (uri == null) return;
         final url = uri.toString();
-        if (!DeepLinkHelper.isPaymentDeepLink(url)) return;
-        final payload = DeepLinkHelper.parsePaymentDeepLink(url);
-        if (payload != null) {
-          Get.offNamed(RouteHelper.getOrderSuccessRoute(
-            payload.orderId,
-            payload.contactNumber,
-            createAccount: payload.createAccount,
-            guestId: payload.guestId,
-          ));
+        
+        if (DeepLinkHelper.isPaymentDeepLink(url)) {
+          final payload = DeepLinkHelper.parsePaymentDeepLink(url);
+          if (payload != null) {
+            Get.offNamed(RouteHelper.getOrderSuccessRoute(
+              payload.orderId,
+              payload.contactNumber,
+              createAccount: payload.createAccount,
+              guestId: payload.guestId,
+            ));
+          }
+        } else if (DeepLinkHelper.isItemDeepLink(url)) {
+          final itemId = DeepLinkHelper.parseItemDeepLink(url);
+          if (itemId != null) {
+            Get.toNamed(RouteHelper.getItemDetailsRoute(itemId, false));
+          }
         }
       });
     });
