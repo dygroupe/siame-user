@@ -109,5 +109,7 @@
 	</array>
 	<key>io.flutter.embedded_views_preview</key>
 	<string>YES</string>
+	<key>GMSApiKey</key>
+	<string>AIzaSyCghSMBO1v1pYn3Tked3CaT2zvJk39u7wk</string>
 </dict>
 </plist>
